@@ -17,7 +17,6 @@ export class CreateBlog extends Component {
     contentForServer: [],
     categories: [],
     modalOnScreen: false,
-    imagePicked: null,
     plusOffset: 0,
     showPlus: false,
   };
@@ -27,29 +26,29 @@ export class CreateBlog extends Component {
     });
   }
   handleSubmit = () => {
-    // fetch('http://localhost:8080/blogs', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     title: this.state.title,
-    //     subtitle: this.state.subtitle,
-    //     content: this.state.content,
-    //     categories: this.state.categories,
-    //   }),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     // console.log(data);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-    console.log(this.state.title);
-    console.log(this.state.subtitle);
-    console.log(this.state.contentForServer);
-    console.log(this.state.categories);
+    fetch('http://localhost:8080/blogs', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: this.state.title,
+        subtitle: this.state.subtitle,
+        content: this.state.contentForServer,
+        categories: this.state.categories,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    // console.log(this.state.title);
+    // console.log(this.state.subtitle);
+    // console.log(this.state.contentForServer);
+    // console.log(this.state.categories);
   };
   closeModal = () => {
     this.setState({
@@ -59,6 +58,9 @@ export class CreateBlog extends Component {
   contentElement = (defaultText, index) => {
     return (
       <div
+        style={{
+          whiteSpace: 'pre',
+        }}
         className="content"
         contentEditable
         suppressContentEditableWarning={true}
@@ -81,7 +83,7 @@ export class CreateBlog extends Component {
               const updatedContentForServer = [...ps.contentForServer];
               updatedContentForServer[index] = {
                 type: 'para',
-                value: e.target.textContent,
+                value: e.target.innerHTML,
               };
               return {
                 contentForServer: updatedContentForServer,
@@ -90,9 +92,12 @@ export class CreateBlog extends Component {
           }
         }}
         onKeyDown={(e) => {
+          // console.log(e.target.innerHTML);
+          // console.log(e.target.textContent);
           // console.log(e.key);
           if (e.key === 'Enter') {
             // console.log(document.body.scrollHeight);
+
             this.setState({
               showPlus: true,
               plusOffset: document.body.scrollHeight,
@@ -108,30 +113,44 @@ export class CreateBlog extends Component {
       </div>
     );
   };
-  inputElement = (text, alias) => {
+  inputElement = (defaultText, alias, index = -1) => {
     return (
       <div
         className={alias}
         contentEditable
         suppressContentEditableWarning={true}
         onFocus={(e) => {
-          if (e.target.textContent === text) {
+          if (e.target.textContent === defaultText) {
             e.target.textContent = '';
             e.target.style.color = 'black';
           }
         }}
         onBlur={(e) => {
           if (e.target.textContent === '') {
-            e.target.textContent = text;
+            e.target.textContent = defaultText;
             e.target.style.color = 'gray';
           } else {
-            this.setState({
-              [alias]: e.target.textContent,
-            });
+            if (alias === 'caption') {
+              this.setState((ps) => {
+                const updatedContentForServer = [...ps.contentForServer];
+                const updatedImageAsset = {
+                  ...updatedContentForServer[index],
+                  caption: e.target.textContent,
+                };
+                updatedContentForServer[index] = updatedImageAsset;
+                return {
+                  contentForServer: updatedContentForServer,
+                };
+              });
+            } else {
+              this.setState({
+                [alias]: e.target.textContent,
+              });
+            }
           }
         }}
       >
-        {text}
+        {defaultText}
       </div>
     );
   };
@@ -264,46 +283,68 @@ export class CreateBlog extends Component {
                   type="file"
                   onChange={(e) => {
                     // console.log(e.target.files[0]);
-                    this.setState(
-                      (ps) => {
-                        // console.log(ps.content);
-                        return {
-                          content: [
-                            ...ps.content,
-                            <PreviewImage>
-                              <img
-                                src={URL.createObjectURL(e.target.files[0])}
-                                alt="choice"
-                              />
-                              {this.inputElement(
-                                'Type caption for image (optional)',
-                                'caption'
-                              )}
-                            </PreviewImage>,
-                          ],
-                          contentForServer: ps.contentForServer.concat({
-                            type: 'image',
-                            value: e.target.files[0],
-                          }),
-                        };
-                      },
-                      () => {
+                    const formData = new FormData();
+                    formData.append('image', e.target.files[0]);
+                    fetch('http://localhost:8080/assets', {
+                      method: 'POST',
+                      body: formData,
+                    })
+                      .then((res) => res.json())
+                      .then((data) => {
+                        // console.log(data);
                         this.setState(
                           (ps) => {
                             return {
-                              content: [
-                                ...ps.content,
-                                this.contentElement('', ps.content.length),
-                              ],
+                              contentForServer: ps.contentForServer.concat({
+                                type: 'image',
+                                value: data.asset.value,
+                                caption: '',
+                              }),
                             };
                           },
                           () => {
-                            console.log(this.state.content);
-                            console.log(this.state.contentForServer);
+                            this.setState(
+                              (ps) => {
+                                // console.log(ps.content);
+                                return {
+                                  content: [
+                                    ...ps.content,
+                                    <PreviewImage>
+                                      <img
+                                        src={URL.createObjectURL(
+                                          e.target.files[0]
+                                        )}
+                                        alt="choice"
+                                      />
+                                      {this.inputElement(
+                                        'Type caption for image (optional)',
+                                        'caption',
+                                        ps.content.length
+                                      )}
+                                    </PreviewImage>,
+                                    this.contentElement(
+                                      '',
+                                      ps.content.length + 1
+                                    ),
+                                  ],
+                                  contentForServer: [
+                                    ...ps.contentForServer,
+                                    {
+                                      type: 'para',
+                                      value: '',
+                                    },
+                                  ],
+                                };
+                              },
+
+                              () => {
+                                // console.log(this.state.content);
+                                // console.log(this.state.contentForServer);
+                              }
+                            );
                           }
                         );
-                      }
-                    );
+                      });
                   }}
                 />
               </FileInputButton>
