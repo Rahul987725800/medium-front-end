@@ -14,6 +14,16 @@ const reducer = (state = initialState, action) => {
         ...state,
         categories: [...state.categories, action.category],
       };
+    case actionTypes.MODIFY_CATEGORY:
+      const updatedCategories = [...state.categories];
+      const index = updatedCategories.findIndex(
+        (cat) => cat._id === action.category._id
+      );
+      updatedCategories[index] = action.category;
+      return {
+        ...state,
+        categories: updatedCategories,
+      };
     default:
       return state;
   }

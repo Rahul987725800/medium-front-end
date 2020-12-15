@@ -23,3 +23,9 @@ export const initCategories = () => {
       });
   };
 };
+export const modifyCategory = (category) => {
+  return {
+    type: actionTypes.MODIFY_CATEGORY,
+    category,
+  };
+};

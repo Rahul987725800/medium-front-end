@@ -1,1 +1,1 @@
-export { initCategories, addCategory } from './blog';
+export { initCategories, addCategory, modifyCategory } from './blog';

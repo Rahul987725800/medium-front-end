@@ -24,3 +24,6 @@ export const getRandomCategories = () => {
   }
   return ans;
 };
+export const getParticularCategory = (category) => {
+  return [category];
+};

@@ -16,6 +16,8 @@ class App extends React.Component {
       if (data.action === 'create') {
         // console.log(data.category);
         this.props.onAddCategory(data.category);
+      } else if (data.action === 'modified') {
+        this.props.onModifyCategory(data.category);
       }
     });
   }
@@ -56,6 +58,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     onInitCategories: () => dispatch(actions.initCategories()),
     onAddCategory: (category) => dispatch(actions.addCategory(category)),
+    onModifyCategory: (category) => dispatch(actions.modifyCategory(category)),
   };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(App);
