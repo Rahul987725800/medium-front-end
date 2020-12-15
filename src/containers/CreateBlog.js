@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { text, getRandomCategories } from '../text';
-import { BlogInput, Window } from './CreateBlogStyles';
+import { Container, BlogInput, Window } from './CreateBlogStyles';
 import Modal from '../components/Modal';
 
 export class CreateBlog extends Component {
@@ -10,6 +10,7 @@ export class CreateBlog extends Component {
     content: '',
     categories: [],
     modalOnScreen: false,
+    imagePicked: null,
   };
   handleSubmit = () => {
     fetch('http://localhost:8080/blogs', {
@@ -178,11 +179,24 @@ export class CreateBlog extends Component {
             </Window>
           </Modal>
         ) : null}
-        <div>
+        <Container>
           <BlogInput>
             {inputElement('Title', 'title')}
             {inputElement('Subtitle', 'subtitle')}
             {inputElement('Tell your story...', 'content')}
+            <input
+              type="file"
+              onChange={(e) => {
+                console.log(e.target.files[0]);
+                this.setState({ imagePicked: e.target.files[0] });
+              }}
+            />
+            {this.state.imagePicked && (
+              <img
+                src={URL.createObjectURL(this.state.imagePicked)}
+                alt="choice"
+              />
+            )}
           </BlogInput>
           <button
             onClick={() => {
@@ -193,7 +207,7 @@ export class CreateBlog extends Component {
           >
             Publish
           </button>
-        </div>
+        </Container>
       </>
     );
   }

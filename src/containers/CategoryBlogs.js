@@ -1,33 +1,36 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import Blogs from '../components/Blogs';
+import Blogs from './Blogs';
+import { connect } from 'react-redux';
 const Container = styled.div``;
 
 export class CategoryBlogs extends Component {
   state = {
-    blogs: [],
+    blogs: null,
   };
   componentDidMount() {
-    fetch(
-      'http://localhost:8080/categories' +
-        this.props.match.url.replaceAll('-', ' ')
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log(data);
-        this.setState({ blogs: data.blogs });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const categoryLoaded = this.props.match.url
+      .replaceAll('-', ' ')
+      .substring(1);
+    // console.log(categoryLoaded);
+    const blogs = this.props.categories.find(
+      (cat) => cat.name === categoryLoaded
+    ).blogs;
+    // console.log(blogs);
+    this.setState({ blogs });
   }
   render() {
     return (
       <Container>
-        <Blogs blogs={this.state.blogs} />
+        {this.state.blogs && <Blogs blogs={this.state.blogs} />}
       </Container>
     );
   }
 }
+const mapStateToProps = (state) => {
+  return {
+    categories: state.blog.categories,
+  };
+};
 
-export default CategoryBlogs;
+export default connect(mapStateToProps)(CategoryBlogs);

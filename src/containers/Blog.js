@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 function Blog(props) {
   const [blog, setBlog] = useState();
   let loadBlog = (blogId) => {
-    fetch('http://localhost:8080/blogs/' + blogId)
+    fetch('http://localhost:8080/blogs/' + blogId + '?complete=true')
       .then((res) => {
         return res.json();
       })

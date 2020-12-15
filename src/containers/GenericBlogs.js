@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import Blogs from '../components/Blogs';
+import Blogs from './Blogs';
 import { connect } from 'react-redux';
 
 const Container = styled.div`
@@ -21,41 +21,33 @@ const Category = styled.span`
   cursor: pointer;
   font-size: 1.1rem;
 `;
-export class GenericBlogs extends Component {
-  state = {
-    blogs: [],
-  };
-  componentDidMount() {
+
+function GenericBlogs(props) {
+  const [blogs, setBlogs] = useState(null);
+
+  useEffect(() => {
     fetch('http://localhost:8080/blogs')
       .then((res) => res.json())
-      .then((data) => {
-        this.setState({ blogs: data.blogs });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-  loadCategory = (category) => {
-    this.props.history.push('/' + category.replaceAll(' ', '-'));
+      .then((data) => setBlogs(data.blogs.map((blog) => blog._id)))
+      .catch((err) => console.log(err));
+  }, []);
+  let loadCategory = (category) => {
+    props.history.push('/' + category.replaceAll(' ', '-'));
   };
-  render() {
-    return (
-      <Container>
-        <Blogs blogs={this.state.blogs} />
-        <div className="categories">
-          {this.props.categories.map((cat) => (
-            <Category
-              key={cat.name}
-              onClick={() => this.loadCategory(cat.name)}
-            >
-              {cat.name}
-            </Category>
-          ))}
-        </div>
-      </Container>
-    );
-  }
+  return (
+    <Container>
+      {blogs && <Blogs blogs={blogs} />}
+      <div className="categories">
+        {props.categories.map((cat) => (
+          <Category key={cat.name} onClick={() => loadCategory(cat.name)}>
+            {cat.name}
+          </Category>
+        ))}
+      </div>
+    </Container>
+  );
 }
+
 const mapStateToProps = (state) => {
   return {
     categories: state.blog.categories,
