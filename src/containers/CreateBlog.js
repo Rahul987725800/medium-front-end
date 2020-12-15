@@ -11,6 +11,8 @@ export class CreateBlog extends Component {
     categories: [],
     modalOnScreen: false,
     imagePicked: null,
+    plusOffset: 0,
+    showPlus: false,
   };
   handleSubmit = () => {
     fetch('http://localhost:8080/blogs', {
@@ -181,9 +183,62 @@ export class CreateBlog extends Component {
         ) : null}
         <Container>
           <BlogInput>
+            {this.state.showPlus && (
+              <button
+                style={{
+                  position: 'absolute',
+                  top: this.state.plusOffset - 25 + 'px',
+                  left: '5%',
+                }}
+              >
+                plus icon
+              </button>
+            )}
             {inputElement('Title', 'title')}
             {inputElement('Subtitle', 'subtitle')}
-            {inputElement('Tell your story...', 'content')}
+            {/* {inputElement('Tell your story...', 'content')} */}
+            <div
+              className={'content'}
+              contentEditable
+              suppressContentEditableWarning={true}
+              onFocus={(e) => {
+                if (e.target.textContent === 'Tell your story...') {
+                  e.target.textContent = '';
+                  e.target.style.color = 'black';
+                }
+                this.setState({
+                  plusOffset: document.body.scrollHeight - 40,
+                  showPlus: true,
+                });
+              }}
+              onBlur={(e) => {
+                if (e.target.textContent === '') {
+                  e.target.textContent = 'Tell your story...';
+                  e.target.style.color = 'gray';
+                } else {
+                  this.setState({
+                    content: e.target.textContent,
+                    showPlus: false,
+                  });
+                }
+              }}
+              onKeyDown={(e) => {
+                // console.log(e.key);
+                if (e.key === 'Enter') {
+                  // console.log(document.body.scrollHeight);
+                  this.setState({
+                    showPlus: true,
+                    plusOffset: document.body.scrollHeight,
+                  });
+                } else {
+                  this.setState({
+                    showPlus: false,
+                  });
+                }
+              }}
+            >
+              Tell your story...
+            </div>
             <input
               type="file"
               onChange={(e) => {
