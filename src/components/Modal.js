@@ -5,7 +5,7 @@ const Container = styled.div`
   top: 0;
   left: 0;
   width: 100vw;
-  height: fit-content;
+  min-height: 100vh;
   background-color: white;
   div.cross {
     width: 80%;

@@ -1,73 +1,141 @@
 import React, { Component } from 'react';
 import { text, getRandomCategories } from '../text';
-import { Container, BlogInput, Window } from './CreateBlogStyles';
+import {
+  Container,
+  BlogInput,
+  Window,
+  FileInputButton,
+  PreviewImage,
+} from './CreateBlogStyles';
 import Modal from '../components/Modal';
 
 export class CreateBlog extends Component {
   state = {
     title: '',
     subtitle: '',
-    content: '',
+    content: [],
+    contentForServer: [],
     categories: [],
     modalOnScreen: false,
     imagePicked: null,
     plusOffset: 0,
     showPlus: false,
   };
+  componentDidMount() {
+    this.setState({
+      content: [this.contentElement('Tell your story...', 0)],
+    });
+  }
   handleSubmit = () => {
-    fetch('http://localhost:8080/blogs', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: this.state.title,
-        subtitle: this.state.subtitle,
-        content: this.state.content,
-        categories: this.state.categories,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // fetch('http://localhost:8080/blogs', {
+    //   method: 'POST',
+    //   body: JSON.stringify({
+    //     title: this.state.title,
+    //     subtitle: this.state.subtitle,
+    //     content: this.state.content,
+    //     categories: this.state.categories,
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // })
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     // console.log(data);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+    console.log(this.state.title);
+    console.log(this.state.subtitle);
+    console.log(this.state.contentForServer);
+    console.log(this.state.categories);
   };
   closeModal = () => {
     this.setState({
       modalOnScreen: false,
     });
   };
+  contentElement = (defaultText, index) => {
+    return (
+      <div
+        className="content"
+        contentEditable
+        suppressContentEditableWarning={true}
+        onFocus={(e) => {
+          if (e.target.textContent === defaultText) {
+            e.target.textContent = '';
+            e.target.style.color = 'black';
+          }
+          this.setState({
+            plusOffset: document.body.scrollHeight - 40,
+            showPlus: true,
+          });
+        }}
+        onBlur={(e) => {
+          if (e.target.textContent === '') {
+            e.target.textContent = defaultText;
+            e.target.style.color = 'gray';
+          } else {
+            this.setState((ps) => {
+              const updatedContentForServer = [...ps.contentForServer];
+              updatedContentForServer[index] = {
+                type: 'para',
+                value: e.target.textContent,
+              };
+              return {
+                contentForServer: updatedContentForServer,
+              };
+            });
+          }
+        }}
+        onKeyDown={(e) => {
+          // console.log(e.key);
+          if (e.key === 'Enter') {
+            // console.log(document.body.scrollHeight);
+            this.setState({
+              showPlus: true,
+              plusOffset: document.body.scrollHeight,
+            });
+          } else {
+            this.setState({
+              showPlus: false,
+            });
+          }
+        }}
+      >
+        {defaultText}
+      </div>
+    );
+  };
+  inputElement = (text, alias) => {
+    return (
+      <div
+        className={alias}
+        contentEditable
+        suppressContentEditableWarning={true}
+        onFocus={(e) => {
+          if (e.target.textContent === text) {
+            e.target.textContent = '';
+            e.target.style.color = 'black';
+          }
+        }}
+        onBlur={(e) => {
+          if (e.target.textContent === '') {
+            e.target.textContent = text;
+            e.target.style.color = 'gray';
+          } else {
+            this.setState({
+              [alias]: e.target.textContent,
+            });
+          }
+        }}
+      >
+        {text}
+      </div>
+    );
+  };
   render() {
-    let inputElement = (text, alias) => {
-      return (
-        <div
-          className={alias}
-          contentEditable
-          suppressContentEditableWarning={true}
-          onFocus={(e) => {
-            if (e.target.textContent === text) {
-              e.target.textContent = '';
-              e.target.style.color = 'black';
-            }
-          }}
-          onBlur={(e) => {
-            if (e.target.textContent === '') {
-              e.target.textContent = text;
-              e.target.style.color = 'gray';
-            } else {
-              this.setState({
-                [alias]: e.target.textContent,
-              });
-            }
-          }}
-        >
-          {text}
-        </div>
-      );
-    };
     return (
       <>
         <button
@@ -184,74 +252,69 @@ export class CreateBlog extends Component {
         <Container>
           <BlogInput>
             {this.state.showPlus && (
-              <button
+              <FileInputButton
                 style={{
                   position: 'absolute',
-                  top: this.state.plusOffset - 25 + 'px',
+                  top: this.state.plusOffset - 35 + 'px',
                   left: '5%',
                 }}
               >
-                plus icon
-              </button>
+                <span>&#43;</span>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    // console.log(e.target.files[0]);
+                    this.setState(
+                      (ps) => {
+                        // console.log(ps.content);
+                        return {
+                          content: [
+                            ...ps.content,
+                            <PreviewImage>
+                              <img
+                                src={URL.createObjectURL(e.target.files[0])}
+                                alt="choice"
+                              />
+                              {this.inputElement(
+                                'Type caption for image (optional)',
+                                'caption'
+                              )}
+                            </PreviewImage>,
+                          ],
+                          contentForServer: ps.contentForServer.concat({
+                            type: 'image',
+                            value: e.target.files[0],
+                          }),
+                        };
+                      },
+                      () => {
+                        this.setState(
+                          (ps) => {
+                            return {
+                              content: [
+                                ...ps.content,
+                                this.contentElement('', ps.content.length),
+                              ],
+                            };
+                          },
+                          () => {
+                            console.log(this.state.content);
+                            console.log(this.state.contentForServer);
+                          }
+                        );
+                      }
+                    );
+                  }}
+                />
+              </FileInputButton>
             )}
-            {inputElement('Title', 'title')}
-            {inputElement('Subtitle', 'subtitle')}
-            {/* {inputElement('Tell your story...', 'content')} */}
-            <div
-              className={'content'}
-              contentEditable
-              suppressContentEditableWarning={true}
-              onFocus={(e) => {
-                if (e.target.textContent === 'Tell your story...') {
-                  e.target.textContent = '';
-                  e.target.style.color = 'black';
-                }
-                this.setState({
-                  plusOffset: document.body.scrollHeight - 40,
-                  showPlus: true,
-                });
-              }}
-              onBlur={(e) => {
-                if (e.target.textContent === '') {
-                  e.target.textContent = 'Tell your story...';
-                  e.target.style.color = 'gray';
-                } else {
-                  this.setState({
-                    content: e.target.textContent,
-                    showPlus: false,
-                  });
-                }
-              }}
-              onKeyDown={(e) => {
-                // console.log(e.key);
-                if (e.key === 'Enter') {
-                  // console.log(document.body.scrollHeight);
-                  this.setState({
-                    showPlus: true,
-                    plusOffset: document.body.scrollHeight,
-                  });
-                } else {
-                  this.setState({
-                    showPlus: false,
-                  });
-                }
-              }}
-            >
-              Tell your story...
+            {this.inputElement('Title', 'title')}
+            {this.inputElement('Subtitle', 'subtitle')}
+            <div>
+              {this.state.content.map((el, i) => (
+                <div key={i}>{el}</div>
+              ))}
             </div>
-            <input
-              type="file"
-              onChange={(e) => {
-                console.log(e.target.files[0]);
-                this.setState({ imagePicked: e.target.files[0] });
-              }}
-            />
-            {this.state.imagePicked && (
-              <img
-                src={URL.createObjectURL(this.state.imagePicked)}
-                alt="choice"
-              />
-            )}
           </BlogInput>
           <button
             onClick={() => {

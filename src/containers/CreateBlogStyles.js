@@ -17,6 +17,9 @@ export const BlogInput = styled.div`
   .content {
     font-size: 2rem;
   }
+  .caption {
+    font-size: 1.3rem;
+  }
 `;
 export const Window = styled.div`
   display: grid;
@@ -104,6 +107,49 @@ export const Window = styled.div`
       :hover {
         color: gray;
       }
+    }
+  }
+`;
+export const FileInputButton = styled.div`
+  width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border: 2px solid #808080;
+  border-radius: 50%;
+  text-align: center;
+  color: #808080;
+
+  :hover {
+    border-color: black;
+    color: black;
+  }
+  input {
+    /* visibility: hidden; */
+    cursor: pointer;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    outline: none;
+    opacity: 0;
+  }
+  span {
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 2.3rem;
+    z-index: 0;
+  }
+`;
+export const PreviewImage = styled.div`
+  text-align: center;
+  margin-bottom: 1rem;
+  img {
+    max-width: 100%;
+    max-height: 80vh;
+    outline: 0.3rem solid transparent;
+    :hover {
+      outline-color: #1c9416;
     }
   }
 `;
