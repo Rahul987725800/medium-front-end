@@ -1,19 +1,8 @@
 import React from 'react';
-import styled from 'styled-components';
-const Card = styled.div`
-  border: 1px solid red;
-  cursor: pointer;
-  .categories {
-  }
-  .title {
-    font-size: 1.8rem;
-    font-weight: bold;
-  }
-  .subtitle {
-    font-size: 1.4rem;
-    color: #919191;
-  }
-`;
+import { Card1, Card2 } from './BlogCardStyles';
+import dogImg from '../images/dog.jpg';
+import reactImg from '../images/react.png';
+import bangleImg from '../images/bangle.jpg';
 
 function BlogCard(props) {
   let categories = '';
@@ -21,16 +10,34 @@ function BlogCard(props) {
     categories += ` ${cat} And`;
   }
   categories = categories.substring(0, categories.length - 3);
-  return (
-    <Card onClick={props.click}>
-      <p className="categories">
-        <span style={{ color: '#919191' }}>in</span> &nbsp; {categories}
-      </p>
-      <p className="title">{props.title}</p>
+  let content = (
+    <>
+      <div className="imgContainer">
+        <img
+          src={Math.random() < 0.5 ? bangleImg : dogImg}
+          alt="dog"
+          className="image"
+        ></img>
+      </div>
+      <div class="content">
+        <p className="categories">
+          <span style={{ color: '#919191' }}>in</span> &nbsp; {categories}
+        </p>
+        <p className="title">{props.title}</p>
 
-      <p className="subtitle">{props.subtitle}</p>
-    </Card>
+        <p className="subtitle">{props.subtitle}</p>
+      </div>
+    </>
   );
+
+  switch (props.card) {
+    case 1:
+      return <Card1 onClick={props.click}>{content}</Card1>;
+    case 2:
+      return <Card2 onClick={props.click}>{content}</Card2>;
+    default:
+      return <Card1 onClick={props.click}>{content}</Card1>;
+  }
 }
 
 export default BlogCard;

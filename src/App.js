@@ -1,7 +1,6 @@
 import React from 'react';
 import openSocket from 'socket.io-client';
 import GenericBlogs from './containers/GenericBlogs';
-import CategoryBlogs from './containers/CategoryBlogs';
 import CreateBlog from './containers/CreateBlog';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import Blog from './containers/Blog';
@@ -31,16 +30,6 @@ class App extends React.Component {
           <Route path="/blogs/:title" component={Blog}></Route>
           <Route path="/blogs" component={GenericBlogs}></Route>
           <Route path="/create-blog" component={CreateBlog}></Route>
-          {this.props.categories.map((cat) => {
-            // console.log(cat.name);
-            return (
-              <Route
-                key={cat.name}
-                path={'/' + cat.name.replaceAll(' ', '-')}
-                component={CategoryBlogs}
-              ></Route>
-            );
-          })}
           <Redirect from="/" to="/blogs"></Redirect>
           <Route render={() => <h1>Not Found</h1>}></Route>
         </Switch>

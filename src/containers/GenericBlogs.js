@@ -1,45 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { Container, Category } from './GenericBlogsStyles';
 import Blogs from './Blogs';
 import { connect } from 'react-redux';
 
-const Container = styled.div`
-  display: grid;
-  grid-template-columns: 60% 40%;
-  .categories {
-    align-self: start;
-    display: flex;
-    flex-wrap: wrap;
-  }
-`;
-const Category = styled.span`
-  padding: 0.5rem 1rem;
-  margin: 1rem;
-  border: 1px solid #d9d9d9;
-  border-radius: 3px;
-  color: #7a7a7a;
-  cursor: pointer;
-  font-size: 1.1rem;
-`;
-
 function GenericBlogs(props) {
-  const [blogs, setBlogs] = useState(null);
-
+  const [allBlogs, setAllBlogs] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [categoryIntersection, setCategoryIntersection] = useState(true);
+  const [activeCategories, setActiveCategories] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:8080/blogs')
+    fetch('http://localhost:8080/blogs?title=1&subtitle=1&categories=1')
       .then((res) => res.json())
-      .then((data) => setBlogs(data.blogs.map((blog) => blog._id)))
+      .then((data) => {
+        setBlogs(data.blogs);
+        setAllBlogs(data.blogs);
+      })
       .catch((err) => console.log(err));
   }, []);
-  let loadCategory = (category) => {
-    props.history.push('/' + category.replaceAll(' ', '-'));
+  useEffect(() => {
+    if (categoryIntersection) {
+      setBlogs(
+        allBlogs.filter((b) => {
+          for (let cat of activeCategories) {
+            if (!b.categories.includes(cat)) return false;
+          }
+          return true;
+        })
+      );
+    } else {
+      setBlogs(
+        allBlogs.filter((b) => {
+          for (let cat of b.categories) {
+            if (activeCategories.includes(cat)) return true;
+          }
+          return false;
+        })
+      );
+    }
+  }, [activeCategories, allBlogs, categoryIntersection]);
+  let loadCategory = (categoryLoaded) => {
+    if (activeCategories.indexOf(categoryLoaded) >= 0) {
+      setActiveCategories((pc) => pc.filter((c) => c !== categoryLoaded));
+      return;
+    }
+    setActiveCategories((pc) => [categoryLoaded, ...pc]);
   };
   return (
     <Container>
       {blogs && <Blogs blogs={blogs} />}
       <div className="categories">
+        <div>
+          <label>Category Intersection</label>
+          <input
+            type="radio"
+            name="selectionType"
+            onChange={() => setCategoryIntersection(true)}
+            checked={categoryIntersection}
+          ></input>
+          <label>Category Union</label>
+          <input
+            type="radio"
+            name="selectionType"
+            onChange={() => setCategoryIntersection(false)}
+            checked={!categoryIntersection}
+          ></input>
+        </div>
         {props.categories.map((cat) => (
-          <Category key={cat.name} onClick={() => loadCategory(cat.name)}>
+          <Category
+            key={cat.name}
+            onClick={() => loadCategory(cat.name)}
+            active={activeCategories.includes(cat.name)}
+          >
             {cat.name}
           </Category>
         ))}

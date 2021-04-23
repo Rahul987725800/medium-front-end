@@ -108,6 +108,11 @@ export class CreateBlog extends Component {
             });
           }
         }}
+        onPaste={(e) => {
+          e.preventDefault();
+          var text = e.clipboardData.getData('text/plain');
+          document.execCommand('insertText', false, text);
+        }}
       >
         {defaultText}
       </div>
@@ -148,6 +153,11 @@ export class CreateBlog extends Component {
               });
             }
           }
+        }}
+        onPaste={(e) => {
+          e.preventDefault();
+          var text = e.clipboardData.getData('text/plain');
+          document.execCommand('insertText', false, text);
         }}
       >
         {defaultText}
@@ -362,6 +372,7 @@ export class CreateBlog extends Component {
               this.setState({
                 modalOnScreen: true,
               });
+              window.scrollTo(0, 0);
             }}
           >
             Publish

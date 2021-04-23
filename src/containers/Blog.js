@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import { Container, Title, Subtitle, Content } from './BlogStyles';
 function Blog(props) {
   const [blog, setBlog] = useState(null);
   useEffect(() => {
@@ -20,10 +20,10 @@ function Blog(props) {
       });
   }, [props.location.search]);
   return blog ? (
-    <div>
-      <p>{blog.title}</p>
-      <p>{blog.subtitle}</p>
-      <div>
+    <Container>
+      <Title>{blog.title}</Title>
+      <Subtitle>{blog.subtitle}</Subtitle>
+      <Content>
         {blog.content.map((obj, i) => {
           switch (obj.type) {
             case 'para':
@@ -34,30 +34,31 @@ function Blog(props) {
                     style={{
                       whiteSpace: 'pre',
                     }}
+                    className="para"
                   ></div>
                 </div>
               );
             case 'image':
               return (
-                <div key={i}>
+                <div key={i} className="image">
                   <div
                     style={{
                       backgroundImage: `url('http://localhost:8080/${obj.value}')`,
-                      backgroundSize: 'cover',
+                      backgroundSize: 'contain',
                       backgroundRepeat: 'no-repeat',
                       height: '80vh',
+                      backgroundPosition: 'center',
                     }}
-                  >
-                    <p>{obj.caption}</p>
-                  </div>
+                  ></div>
+                  <p>{obj.caption}</p>
                 </div>
               );
             default:
               return null;
           }
         })}
-      </div>
-    </div>
+      </Content>
+    </Container>
   ) : null;
 }
 
